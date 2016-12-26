@@ -39,7 +39,7 @@ db.once('open', function() {
   // remove bank
   bank_router.delete('/:id', function(req, res) {
     Bank.findOneAndRemove({_id: req.params.id}, function(err) {
-      if(err) return console.error(err);
+      if(err) return console.error(err); 
       res.sendStatus(200);
     });
   });
@@ -50,6 +50,7 @@ db.once('open', function() {
       res.json(docs);
     });
   });
+
   // get banks for user
   bank_router.get('/allbanksforuser/:id', function(req, res) {
     Bank.find({user_id: req.params.id}, function(err, docs) {

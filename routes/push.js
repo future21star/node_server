@@ -15,9 +15,9 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
 	  console.log('Connected to MongoDB');
 
-  push_router.get('/', function(req, res) {
-    User.find({}, function(err, obj){
-        var device_tokens = obj.map((value) => {return value["register_id"];}); //create array for storing device tokens
+  push_router.get('/:id', function(req, res) {
+    User.findOne({_id: req.params.id}, function(err, obj){
+        var device_tokens = obj.register_id; //create array for storing device tokens
         var retry_times = 4; //the number of times to retry sending the message if it fails
         var sender = new gcm.Sender(gcmApiKey); //create a new sender
         var message = new gcm.Message(); //create a new message
@@ -33,8 +33,8 @@ db.once('open', function() {
         //in your ionic v2 app and update device_tokens[0] with it for testing.
         //Later save device tokens to db and 
         //get back all tokens and push to multiple devices
-        device_tokens[0] = "cxS6IC-USkI:APA91bGKhnJXuwCDWp0ul6526orjonge_RFEfxJVYF9bDAG-CXvDHIF9p46usL0QhFzKIHIW2T0hr39rvQRjxrq7Zi9e3E5yKDyS8UhGnEI_k0GpY4EoJVaJ_VOGqmopiXlaGua0APbW";
-        sender.send(message, device_tokens[0], retry_times, function (result) {
+        console.log("device tokens", device_tokens);
+        sender.send(message, device_tokens, retry_times, function (result) {
             console.log('push sent to: ' + device_tokens);
             res.status(200).send('Pushed notification ' + device_tokens);
         }, function (err) {
