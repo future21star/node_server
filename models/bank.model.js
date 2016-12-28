@@ -6,7 +6,8 @@ var bankSchema = mongoose.Schema({
     bank_rating: Number,
     bank_user_name: String,
     bank_user_password: String,
-    user_account_number: String
+    user_account_number: String,
+    access_token: String
 });
 
 var Bank = mongoose.model('Bank', bankSchema);

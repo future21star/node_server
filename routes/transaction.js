@@ -113,33 +113,124 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
 
 	transaction_router.get('/:bank_id', function(req, res) {
-        Bank.findOne({_id: req.params.bank_id}, function(err, bank_info) {
-            if(err) return console.error(err);
-            if (bank_info) {
-                var bank = Banking({
-                    fid: bank_info.bank_data.fi_id
-                    , fidOrg: bank_info.bank_data.fi_org
-                    , url: bank_info.bank_data.url
-                    , bankId: null /* If bank account use your bank routing number otherwise set to null */
-                    , user: bank_info.bank_user_name
-                    , password: bank_info.bank_user_password
-                    , accId: bank_info.user_account_number /* Account Number */
-                    , accType: 'CHECKING' /* CHECKING || SAVINGS || MONEYMRKT || CREDITCARD */
-                    , ofxVer: 102 /* default 102 */
-                    , app: 'QWIN' /* default  'QWIN' */
-                    , appVer: '1700' /* default 1700 */
-                });
-                // date format YYYYMMDDHHMMSS
-                // bank.getStatement({start:20130101, end:20171101}, function(err, statement){
-                //     if(err) console.log(err)
-                //     Banking.parse(statement, function (json_statement) {
-                //         res.status(200).json(json_statement);
-                //     });
-                //     return res;
-                // });  
-                res.status(200).json(BANK_STATEMENT);
-            }
-        });
+    res.status(200).json(BANK_STATEMENT);
+        // Bank.findOne({_id: req.params.bank_id}, function(err, bank_info) {
+        //     if(err) return console.error(err);
+        //     if (bank_info) {
+        //         var bank = Banking({
+        //             fid: bank_info.bank_data.fi_id
+        //             , fidOrg: bank_info.bank_data.fi_org
+        //             , url: bank_info.bank_data.url
+        //             , bankId: null /* If bank account use your bank routing number otherwise set to null */
+        //             , user: bank_info.bank_user_name
+        //             , password: bank_info.bank_user_password
+        //             , accId: bank_info.user_account_number /* Account Number */
+        //             , accType: 'CHECKING' /* CHECKING || SAVINGS || MONEYMRKT || CREDITCARD */
+        //             , ofxVer: 102 /* default 102 */
+        //             , app: 'QWIN' /* default  'QWIN' */
+        //             , appVer: '1700' /* default 1700 */
+        //         });
+        //         // date format YYYYMMDDHHMMSS
+        //         bank.getStatement({start:20130101, end:20171101}, function(err, statement){
+        //             if(err) console.log(err)
+        //             Banking.parse(statement, function (json_statement) {
+        //                 res.status(200).json(json_statement);
+        //             });
+        //             return res;
+        //         });  
+        //         res.status(200).json(BANK_STATEMENT);
+        //     }
+        // });
+        // var ofx4js = require("ofx4js");
+        // //var financial_institution = require("FinancialInstitutionImpl");
+        // var BaseFinancialInstitutionData = ofx4js.client.impl.BaseFinancialInstitutionData;
+        // var OFXV1Connection = ofx4js.client.net.OFXV1Connection;
+
+        // // input your bank's information.  See http://www.ofxhome.com/
+        // var bank = new BaseFinancialInstitutionData();
+        // bank.setFinancialInstitutionId("7101");
+        // bank.setOrganization("Discover Financial Services");
+        // bank.setOFXURL("https://www.discover.com");
+        // //bank.setName("");
+
+        // var connection = new OFXV1Connection();
+
+        // var FinancialInstitutionImpl = ofx4js.client.impl.FinancialInstitutionImpl;
+        // var service = new FinancialInstitutionImpl(bank, connection);
+        // return service.readProfile()
+        //   .then( data => {
+        //     console.log(data);
+        //     res.status(200).json(data);
+        //   });
+
+        // var ofx = require('ofx');
+
+        // var header = {
+        //     OFXHEADER: '100',
+        //     DATA: 'OFXSGML',
+        //     VERSION: '103',
+        //     SECURITY: 'NONE',
+        //     ENCODING: 'USASCII',
+        //     CHARSET: '1252',
+        //     COMPRESSION: 'NONE',
+        //     OLDFILEUID: 'NONE',
+        //     NEWFILEUID: 'unique id here'
+        // };
+
+        // var body = {
+        //     SIGNONMSGSRQV1: {
+        //       SONRQ: {
+        //         DTCLIENT: '20161227101000',
+        //         USERID: 'Blocktech17',
+        //         USERPASS: 'Testing01$',
+        //         LANGUAGE: 'ENG',
+        //         FI: {
+        //           ORG: 'BB&T',
+        //           FID: 'BB&T'
+        //         },
+        //         APPID: 'QWIN',
+        //         APPVER: '2100',
+        //       },
+        //     BANKMSGSRQV1: {
+        //       STMTTRNRQ: {
+        //         TRNUID: '1001',
+        //         STMTRQ: {
+        //           BANKACCTFROM: {
+        //             BANKID: '053101121',
+        //             ACCTID: '5207507727',
+        //             ACCTTYPE: 'CHECKING'
+        //           },
+        //           INCTRAN: {
+        //             INCLUDE: ''
+        //           }
+        //         }
+        //       }
+        //     }
+        //     }
+        // };
+        // var ofx_string = ofx.serialize(header, body);
+        // ofx.serialize(header, body).then(data => {
+        //   console.log(data);
+        //   res.json(data);
+        // })
+
+        // var bank = Banking({
+        //     fid: "BB&T"
+        //     , fidOrg: "BB&T"
+        //     , url: "https://www.bbt.com/"
+        //     , bankId: "053101121" /* If bank account use your bank routing number otherwise set to null */
+        //     , user: "Blocktech17"
+        //     , password: "Testing01$"
+        //     , accId: "5207507727" /* Account Number */
+        //     , accType: "CHECKING" /* CHECKING || SAVINGS || MONEYMRKT || CREDITCARD */
+        // });
+        // // date format YYYYMMDDHHMMSS
+        // bank.getStatement({}, function(err, statement){
+        //     if(err) console.log("error", err)
+        //     console.log(statement);
+        //     res.json(statement);
+        // });  
+
 	});
 });
 

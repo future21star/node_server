@@ -11,7 +11,7 @@ var Notification = require('../models/notification.model.js');
 
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
-	  console.log('Connected to MongoDB');
+	console.log('Connected to MongoDB');
 
   notification_router.get('/:id', function(req, res) {
     Notification.find({user_id: req.params.id}, function(err, docs) {
