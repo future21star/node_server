@@ -10,8 +10,8 @@ var plaid = require('plaid');
 //Models
 var Bank = require('../models/bank.model.js');
 
-var client_id = "5864083c393619270a2ec6db"; 
-var secret = "fef2d4a7533b2047230b7dfa719be3";
+var client_id = "586aa0a2393619270a2ec970"; 
+var secret = "33ef9e75c30cadbff5ee6e70e6747c";
 var test_client_id = "test_id";
 var test_secret = "test_secret";
 var plaid_env = plaid.environments.tartan; 
@@ -77,20 +77,51 @@ db.once('open', function() {
 
   });
 
-  bank_router.get('/get_transactions/:access_token', function(req, res){
-    var plaidClient = new plaid.Client(client_id, secret, plaid_env);
-    plaidClient.upgradeUser(req.params.access_token, "connect", {}, function(upgrade_err, upgrade_res){
-      // if (upgrade_err) return console.log("upgrade error", upgrade_err);
-      plaidClient.getConnectUser(req.params.access_token, {
-        gte: '30 days ago',
-      }, function(err1, response) {
-        // console.log('You have ' + response.transactions.length +
-        //             ' transactions from the last thirty days.');
-        if (err1) return console.log("get connect user error", err1);
-        console.log("------------------------all transaction history-------------------", response.transactions, "------------------------all transaction history-------------------");
-        res.json(response.transactions);
+  bank_router.get('/get_transactions/:access_token/:user_id', function(req, res){
+    if (req.params.access_token != "undefined") {
+      console.log("bank transactions");      
+      var plaidClient = new plaid.Client(client_id, secret, plaid_env);
+      plaidClient.upgradeUser(req.params.access_token, "connect", {}, function(upgrade_err, upgrade_res){
+        // if (upgrade_err) return console.log("upgrade error", upgrade_err);
+        plaidClient.getConnectUser(req.params.access_token, {
+          gte: '30 days ago',
+        }, function(err1, response) {
+          // console.log('You have ' + response.transactions.length +
+          //             ' transactions from the last thirty days.');
+          if (err1) return console.log("get connect user error", err1);
+          console.log("------------------------all transaction history-------------------", response.transactions, "------------------------all transaction history-------------------");
+          res.json(response.transactions);
+        });
       });
-    });
+    }
+    else if (req.params.user_id != "null"){
+      console.log("all transactions");
+      transactions = [];
+      Bank.find({user_id: req.params.user_id }, function(err, banks){
+        if (err) return console.log(err);
+        let number_of_banks = banks.length;
+        for (let bank of banks) {
+          var plaidClient = new plaid.Client(client_id, secret, plaid_env);
+          plaidClient.upgradeUser(bank.access_token, "connect", {}, function(upgrade_err, upgrade_res){
+            // if (upgrade_err) return console.log("upgrade error", upgrade_err);
+            plaidClient.getConnectUser(bank.access_token, {
+              gte: '30 days ago',
+            }, function(err1, response) {
+              if (err1) return console.log("get connect user error", err1);
+              transactions = transactions.concat(response.transactions);
+              number_of_banks = number_of_banks - 1;
+              if (number_of_banks === 0) {
+                res.json(transactions);
+              } 
+            });
+          });
+        }
+      });      
+    }
+    else {
+      console.log("none transactions");
+      res.json([]);
+    }
   });
   //retrieve transaction
   function retrieve_transaction_history(plaidClient, access_token) {
