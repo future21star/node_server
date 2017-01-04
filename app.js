@@ -44,7 +44,7 @@ app.use('/users', users);
 app.use('/authenticate', authenticate);
 app.use('/bank', bank);
 app.use('/notification', notification );
-app.use('/push', push);
+app.use('/push_notification', push);
 app.use('/transaction', transaction);
 
 // catch 404 and forward to error handler

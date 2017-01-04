@@ -17,9 +17,37 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
 	  console.log('Connected to MongoDB');
 
-  push_router.get('/:id', function(req, res) {
-    User.findOne({_id: req.params.id}, function(err, obj){
+    push_router.post('/', function(req, res) {
+        console.log("push_notification_hook", req.body);
+        res.status(200);
+        // User.findOne({_id: req.params.id}, function(err, obj){
+        //     //FCM Message Send
+        //     var fcm = new FCM(fcmApiKey);
+        //     var device_tokens = obj.register_id; //create array for storing device tokens
 
+        //     var message = {
+        //         to: device_tokens[0], // required fill with device token or topics
+        //         // collapse_key: 'your_collapse_key', 
+        //         // data: {
+        //         //     your_custom_data_key: 'your_custom_data_value'
+        //         // },
+        //         notification: {
+        //             title: 'Title of your push notification',
+        //             body: 'Body of your push notification'
+        //         }
+        //     };
+
+        //     //callback style
+        //     fcm.send(message, function(err, response){
+        //         if (err) {
+        //             console.log("Something has gone wrong!");
+        //         } else {
+        //             console.log("Successfully sent with response: ", response);
+        //         }
+        //     });
+        // });            
+    });
+  push_router.get('/:id', function(req, res) {
         // GCM Message Send
         // var device_tokens = obj.register_id; //create array for storing device tokens
         // var retry_times = 4; //the number of times to retry sending the message if it fails
@@ -44,43 +72,6 @@ db.once('open', function() {
         // }, function (err) {
         //     res.status(500).send('failed to push notification ');
         // });
-
-        //FCM Message Send
-        var fcm = new FCM(fcmApiKey);
-        var device_tokens = obj.register_id; //create array for storing device tokens
-
-        var message = {
-            to: device_tokens[0], // required fill with device token or topics
-            // collapse_key: 'your_collapse_key', 
-            // data: {
-            //     your_custom_data_key: 'your_custom_data_value'
-            // },
-            notification: {
-                title: 'Title of your push notification',
-                body: 'Body of your push notification'
-            }
-        };
-
-        //callback style
-        fcm.send(message, function(err, response){
-            if (err) {
-                console.log("Something has gone wrong!");
-            } else {
-                console.log("Successfully sent with response: ", response);
-            }
-        });
-
-        //promise style
-        // fcm.send(message)
-        //     .then(function(response){
-        //         console.log("Successfully sent with response: ", response);
-        //     })
-        //     .catch(function(err){
-        //         console.log("Something has gone wrong!");
-        //         console.error(err);
-        //     })
-        
-    });
   });
   
 });
