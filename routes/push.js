@@ -9,17 +9,78 @@ var mongoose = require('mongoose');
 mongoose.createConnection('mongodb://localhost:27017/ionic_server');
 var db = mongoose.connection;
 mongoose.Promise = global.Promise;
-
+var count = 0;
+var client_id = "586da085393619270a2ecb5a"; 
+var secret = "ced7af46b51adb617b16c9cedaad2b";
+var test_client_id = "test_id";
+var test_secret = "test_secret";
+var plaid = require('plaid');
+var plaid_env = plaid.environments.tartan; 
+var plaidClient = new plaid.Client(client_id, secret, plaid_env);
 //Models
 var User = require('../models/user.model.js');
-
+var Bank = require('../models/bank.model.js');
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
 	  console.log('Connected to MongoDB');
 
+    setInterval(function(){
+      count+=1;
+      Bank.find({}, function(err, res){
+        if (err) return console.log(err);
+        for (var bank of res) {
+          plaidClient.getConnectUser(bank.access_token, {
+            pending: true
+          }, function(err1, response) {
+            console.log("check for updates", count);
+            if (err1) console.log("check for updates error", err1);
+            if (!err1) {
+              console.log("response transactions length", response.transactions.length, "bank transaction count", bank.transactions_count);
+              if (response.transactions.length > bank.transactions_count) {
+                send_push_notification(bank["user_id"], response.transactions[0]);
+                Bank.findOneAndUpdate({_id: bank["_id"]}, {transactions_count: response.transactions.length}, function(err, response){
+                  if (err) console.log(err);
+                });
+              }
+            }
+          });
+        }
+      })
+    }, 2000);
+
+    function send_push_notification(user_id, transaction) {
+        console.log("send push notification");
+        User.findOne({_id: user_id}, function(err, obj){
+            //FCM Message Send
+            var fcm = new FCM(fcmApiKey);
+            var device_tokens = obj.register_id; //create array for storing device tokens
+            var body;
+            body = "amount:"+transaction["amount"]+"date"+transaction["date"]+"name"+transaction["name"];
+            var message = {
+                to: device_tokens[0], // required fill with device token or topics
+                // collapse_key: 'your_collapse_key', 
+                // data: {
+                //     your_custom_data_key: 'your_custom_data_value'
+                // },
+                notification: {
+                    title: 'Transaction',
+                    body: body
+                }
+            };
+
+            //callback style
+            fcm.send(message, function(err, response){
+                if (err) {
+                    console.log("Something has gone wrong!");
+                } else {
+                    console.log("Successfully sent with response: ", response);
+                }
+            });
+        });            
+    }
     push_router.post('/', function(req, res) {
-        console.log("push_notification_hook", req.body);
-        res.status(200);
+        // console.log("push_notification_hook", req.body);
+        // res.status(200);
         // User.findOne({_id: req.params.id}, function(err, obj){
         //     //FCM Message Send
         //     var fcm = new FCM(fcmApiKey);

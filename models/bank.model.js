@@ -7,7 +7,8 @@ var bankSchema = mongoose.Schema({
     bank_user_name: String,
     bank_user_password: String,
     user_account_number: String,
-    access_token: String
+    access_token: String,
+    transactions_count: Number
 });
 
 var Bank = mongoose.model('Bank', bankSchema);

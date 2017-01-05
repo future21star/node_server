@@ -19,7 +19,7 @@ var notification = require('./routes/notification');
 var push = require('./routes/push');
 var transaction = require('./routes/transaction');
 var app = express();
-
+var count = 0;
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');

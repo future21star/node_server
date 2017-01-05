@@ -10,8 +10,8 @@ var plaid = require('plaid');
 //Models
 var Bank = require('../models/bank.model.js');
 
-var client_id = "586aa0a2393619270a2ec970"; 
-var secret = "33ef9e75c30cadbff5ee6e70e6747c";
+var client_id = "586da085393619270a2ecb5a"; 
+var secret = "ced7af46b51adb617b16c9cedaad2b";
 var test_client_id = "test_id";
 var test_secret = "test_secret";
 var plaid_env = plaid.environments.tartan; 
@@ -28,8 +28,12 @@ db.once('open', function() {
       if (err) return console.error(err);
       if (mfaResponse != null) {
         bank.access_token = mfaResponse.access_token;
+        bank.transactions_count = 0;
+        console.log("transactions count:", 0)    
       } else {
-        bank.access_token = response.access_token;          
+        bank.access_token = response.access_token;      
+        console.log("transactions count:", response.transactions.length)    
+        bank.transactions_count = response.transactions.length;
       }
       Bank.create(bank, function(bank_err, bank_res) {
           if(bank_err) return console.error(bank_err);
@@ -52,7 +56,9 @@ db.once('open', function() {
       if (mfaResponse != null) {
         res.status(201).json({mfa: mfaResponse});
       } else {
-        res.status(200).json(auth_res);
+        Bank.findOneAndUpdate({access_token: auth_res.access_token}, {transactions_count: auth_res.transactions.length}, function(update_err, update_res){
+          res.status(200).json(auth_res);
+        })
       }
     });
   })
@@ -63,12 +69,12 @@ db.once('open', function() {
       plaidClient.upgradeUser(req.params.access_token, "connect", {"webhook":"https://server-for-financial-app-warzi117.c9users.io/push_notification"}, function(upgrade_err, upgrade_res){
         // if (upgrade_err) return console.log("upgrade error", upgrade_err);
         plaidClient.getConnectUser(req.params.access_token, {
-          gte: '30 days ago',
+          
         }, function(err1, response) {
           // console.log('You have ' + response.transactions.length +
           //             ' transactions from the last thirty days.');
           if (err1) return console.log("get connect user error", err1);
-          console.log("------------------------all transaction history-------------------", response.transactions, "------------------------all transaction history-------------------");
+          // console.log("------------------------all transaction history-------------------", response.transactions, "------------------------all transaction history-------------------");
           res.json(response.transactions);
         });
       });
@@ -84,7 +90,7 @@ db.once('open', function() {
           plaidClient.upgradeUser(bank.access_token, "connect", {}, function(upgrade_err, upgrade_res){
             // if (upgrade_err) return console.log("upgrade error", upgrade_err);
             plaidClient.getConnectUser(bank.access_token, {
-              gte: '30 days ago',
+              
             }, function(err1, response) {
               if (err1) return console.log("get connect user error", err1);
               transactions = transactions.concat(response.transactions);
@@ -103,15 +109,15 @@ db.once('open', function() {
     }
   });
   //retrieve transaction
-  function retrieve_transaction_history(plaidClient, access_token) {
-    plaidClient.getConnectUser(access_token, {
-      gte: '30 days ago',
-    }, function(err, response) {
-      // console.log('You have ' + response.transactions.length +
-      //             ' transactions from the last thirty days.');
-      console.log("------------------------all transaction history-------------------", response.transactions, "------------------------all transaction history-------------------");
-    });
-  }
+  // function retrieve_transaction_history(plaidClient, access_token) {
+  //   plaidClient.getConnectUser(access_token, {
+  //     gte: '30 days ago',
+  //   }, function(err, response) {
+  //     // console.log('You have ' + response.transactions.length +
+  //     //             ' transactions from the last thirty days.');
+  //     console.log("------------------------all transaction history-------------------", response.transactions, "------------------------all transaction history-------------------");
+  //   });
+  // }
 
   // update by id
   bank_router.put('/:id', function(req, res) {
